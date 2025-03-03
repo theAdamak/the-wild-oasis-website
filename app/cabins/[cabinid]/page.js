@@ -6,7 +6,7 @@ export async function generateMetadata({ params }) {
   const { name } = await getCabin(params.cabinId);
   return { title: ` cabin ${name}` };
 }
-
+//make dynamic rendering to static rendering
 export async function generateStaticParams() {
   const cabins = await getCabins();
   const ids = cabins.map((cabin) => ({ cabinId: String(cabin.id) }));

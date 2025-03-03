@@ -2,6 +2,9 @@ import { Suspense } from "react";
 import CabinList from "@/app/_components/CabinList";
 import Spinner from "@/app/_components/Spinner";
 
+//for rerender when data change in any time (isr)
+export const revalidate = 3600;
+
 export const metadata = {
   title: "Cabins",
 };
