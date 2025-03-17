@@ -15,7 +15,7 @@ export async function updateGuest(formData) {
   if (!/[a-zA-Z0-9]{6,12}$/.test(nationalID)) throw new Error("unvalid number");
   const updateData = { nationalID, nationality, countryFlag };
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("guests")
     .update(updateData)
     .eq("id", session.user.guestId)
@@ -28,8 +28,29 @@ export async function updateGuest(formData) {
   }
   revalidatePath("/account/profile");
 }
+export async function createBooking(bookingData, formData) {
+  const session = await auth();
+  if (!session) throw new Error(" must be logged in");
 
-export async function deleteReservation({ bookingId }) {
+  const newBooking = {
+    ...bookingData,
+    numGuests: Number(formData.get("numGuests")),
+    observations: formData.get("observations").slice(0, 1000),
+    guestId: session.user.guestId,
+    totalPrice: 0,
+    idPaid: false,
+    hasBreakfast: false,
+    status: "unconfirmed",
+  };
+  const { error } = await supabase.from("bookings").insert([newBooking]);
+
+  if (error) {
+    console.error(error);
+    throw new Error("Booking could not be created");
+  }
+  revalidatePath(`/cabins/${bookingData.cabinId}`);
+}
+export async function deleteReservation(bookingId) {
   const session = await auth();
   if (!session) throw new Error(" must be logged in");
 
@@ -49,6 +70,7 @@ export async function deleteReservation({ bookingId }) {
     throw new Error("Booking could not be deleted");
   }
   revalidatePath("/account/reservations");
+  redirect("/cabins/thankyou");
 }
 export async function updateReservation(formData) {
   const bookingId = Number(formData.get("bookingId"));
